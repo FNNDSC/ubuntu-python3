@@ -3,6 +3,8 @@
 # to load qemu binariesfor ppc64le emulation
 
 dist: bionic
+language: shell
+os: linux
 
 env:
   - DOCKER_CLI_EXPERIMENTAL=enabled TARGET_ARCH=linux/amd64,linux/ppc64le
@@ -27,8 +29,9 @@ jobs:
       script: docker buildx build -t fnndsc/ubuntu-python3 --platform "$TARGET_ARCH" --progress plain .
     - stage: build_and_push
       if: branch = master
-      before_script: docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-      script: docker buildx build -t fnndsc/ubuntu-python3 --platform "$TARGET_ARCH" --progress plain --push .
+      script:
+        - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+        - docker buildx build -t fnndsc/ubuntu-python3 --platform "$TARGET_ARCH" --progress plain --push .
       after_script: docker logout
 
 after_script:
