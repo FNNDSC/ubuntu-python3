@@ -12,14 +12,14 @@ before_install:
   - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) edge"
   - sudo apt-get update
   - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
-  - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+  - docker run --rm --privileged aptman/qus -s -- -p ppc64le
 
 before_script:
   - docker version
   - docker buildx create --name moc_builder --use
 
 script:
-  - docker buildx build -t fnndsc/ubuntu-python3 --platform "$TARGET_ARCH" .
+  - docker buildx build -t fnndsc/ubuntu-python3 --platform "$TARGET_ARCH" --progress plain .
 
 after_script:
   - docker buildx rm
