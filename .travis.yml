@@ -1,0 +1,26 @@
+# https://github.com/jdrouet/docker-on-ci/blob/master/.travis.yml
+
+dist: bionic
+
+env:
+  - DOCKER_CLI_EXPERIMENTAL=enabled
+  - TARGET_ARCH=linux/amd64,linux/ppc64le
+
+before_install:
+  - sudo rm -rf /var/lib/apt/lists/*
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - lsb_release -cs
+  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) edge"
+  - sudo apt-get update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+  - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+
+before_script:
+  - docker version
+  - docker buildx create --name moc_builder --use
+
+script:
+  - docker buildx build -t fnndsc/ubuntu-python3 --platform "$TARGET_ARCH" .
+
+after_script:
+  - docker buildx rm
