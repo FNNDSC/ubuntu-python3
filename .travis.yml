@@ -1,4 +1,6 @@
 # https://github.com/jdrouet/docker-on-ci/blob/master/.travis.yml
+# using aptman/qus instead of multiarch/qemu-user-static
+# to load qemu binariesfor ppc64le emulation
 
 dist: bionic
 
