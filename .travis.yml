@@ -3,8 +3,7 @@
 dist: bionic
 
 env:
-  - DOCKER_CLI_EXPERIMENTAL=enabled
-  - TARGET_ARCH=linux/amd64,linux/ppc64le
+  - DOCKER_CLI_EXPERIMENTAL=enabled TARGET_ARCH=linux/amd64,linux/ppc64le
 
 before_install:
   - sudo rm -rf /var/lib/apt/lists/*
