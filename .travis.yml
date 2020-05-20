@@ -21,7 +21,9 @@ before_script:
   - docker buildx create --name moc_builder --use
 
 script:
-  - docker buildx build -t fnndsc/ubuntu-python3 --platform "$TARGET_ARCH" --progress plain .
+  - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+  - docker buildx build -t fnndsc/ubuntu-python3 --platform "$TARGET_ARCH" --progress plain --push .
 
 after_script:
   - docker buildx rm
+  - docker logout
