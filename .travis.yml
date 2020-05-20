@@ -1,13 +1,17 @@
+# Automatically build the fnndsc/ubuntu-python3 Docker image on x86_64 and PowerPC.
+# On master branch, the image is pushed to Dockerhub as fnndsc/ubuntu-python3:latest.
+# If the commit is tagged, then two tags are used: fnndsc/ubuntu-python3:latest and fnndsc/ubuntu-python3:<GIT_TAG>
+#
 # https://github.com/jdrouet/docker-on-ci/blob/master/.travis.yml
 # using aptman/qus instead of multiarch/qemu-user-static
-# to load qemu binariesfor ppc64le emulation
+# to load qemu binariesfor ppc64le emulation.
 
 dist: bionic
 language: shell
 os: linux
 
 env:
-  - DOCKER_CLI_EXPERIMENTAL=enabled TARGET_ARCH=linux/amd64,linux/ppc64le
+  - DOCKER_CLI_EXPERIMENTAL=enabled TARGET_ARCH=linux/amd64,linux/ppc64le IMAGE_TAG=fnndsc/ubuntu-python3
 
 before_install:
   - sudo rm -rf /var/lib/apt/lists/*
@@ -22,17 +26,27 @@ before_script:
   - docker version
   - docker buildx create --name moc_builder --use
 
+stages:
+  - name: login
+    if: branch = master
+  - name: build_only
+    if: branch != master
+  - name: build_and_push
+    if: branch = master
+
 jobs:
   include:
+    - stage: login
+      script: docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
     - stage: build_only
-      if: branch != master
-      script: docker buildx build -t fnndsc/ubuntu-python3 --platform "$TARGET_ARCH" --progress plain .
+      script: docker buildx build --platform "$TARGET_ARCH" --progress plain -t $IMAGE_TAG .
     - stage: build_and_push
-      if: branch = master
-      script:
-        - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-        - docker buildx build -t fnndsc/ubuntu-python3 --platform "$TARGET_ARCH" --progress plain --push .
-      after_script: docker logout
+      if: tag IS blank
+      script: docker buildx build --platform "$TARGET_ARCH" --progress plain -t $IMAGE_TAG --push .
+    - stage: build_and_push
+      if: tag IS present
+      script: docker buildx build --platform "$TARGET_ARCH" --progress plain -t $IMAGE_TAG -t "$IMAGE_TAG:$TRAVIS_TAG" --push .
 
 after_script:
   - docker buildx rm
+  - docker logout
