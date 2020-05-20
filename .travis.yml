@@ -28,11 +28,11 @@ before_script:
 
 stages:
   - name: login
-    if: branch = master
+    if: branch = master AND type != pull_request
   - name: build_only
-    if: branch != master
+    if: branch != master OR type = pull_request
   - name: build_and_push
-    if: branch = master
+    if: branch = master AND type != pull_request
 
 jobs:
   include:
