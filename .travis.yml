@@ -26,7 +26,7 @@ before_script:
   - docker version
   - docker buildx create --name moc_builder --use
   - |
-    if [ -n "$DOCKER_PASSWORD" ] && [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+    if [ -n "$DOCKER_PASSWORD" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
       docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
       export PUSH=--push
       if [ -n "$TRAVIS_TAG" ]; then
