@@ -33,6 +33,7 @@ stages:
     if: branch != master OR type = pull_request
   - name: build_and_push
     if: branch = master AND type != pull_request
+  - name: cleanup
 
 jobs:
   include:
@@ -46,8 +47,8 @@ jobs:
     - stage: build_and_push
       if: tag IS present
       script: docker buildx build --platform "$TARGET_ARCH" --progress plain -t $IMAGE_TAG -t "$IMAGE_TAG:$TRAVIS_TAG" --push .
-
-after_script:
-  - docker buildx rm
-  - docker logout
-  - docker run --rm --privileged aptman/qus -- -r
+    - stage: cleanup
+      after_script:
+      - docker buildx rm
+      - docker logout
+      - docker run --rm --privileged aptman/qus -- -r
