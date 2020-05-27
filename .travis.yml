@@ -25,30 +25,18 @@ before_install:
 before_script:
   - docker version
   - docker buildx create --name moc_builder --use
+  - |
+    if [ -n "$DOCKER_PASSWORD" ] && [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+      docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+      export PUSH=--push
+      if [ -n "$TRAVIS_TAG" ]; then
+        export SPECIFIC_TAG="-t '$IMAGE_TAG:$TRAVIS_TAG'"
+      fi
+    fi
 
-stages:
-  - name: login
-    if: branch = master AND type != pull_request
-  - name: build_only
-    if: branch != master OR type = pull_request
-  - name: build_and_push
-    if: branch = master AND type != pull_request
-  - name: cleanup
+script: docker buildx build --platform "$TARGET_ARCH" --progress plain -t $IMAGE_TAG $SPECIFIC_TAG $PUSH .
 
-jobs:
-  include:
-    - stage: login
-      script: docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-    - stage: build_only
-      script: docker buildx build --platform "$TARGET_ARCH" --progress plain -t $IMAGE_TAG .
-    - stage: build_and_push
-      if: tag IS blank
-      script: docker buildx build --platform "$TARGET_ARCH" --progress plain -t $IMAGE_TAG --push .
-    - stage: build_and_push
-      if: tag IS present
-      script: docker buildx build --platform "$TARGET_ARCH" --progress plain -t $IMAGE_TAG -t "$IMAGE_TAG:$TRAVIS_TAG" --push .
-    - stage: cleanup
-      after_script:
-      - docker buildx rm
-      - docker logout
-      - docker run --rm --privileged aptman/qus -- -r
+after_script:
+  - docker buildx rm
+  - docker logout
+  - docker run --rm --privileged aptman/qus -- -r
