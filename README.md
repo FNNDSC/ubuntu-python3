@@ -8,6 +8,9 @@ Source for a slim Ubuntu-based Python3 image
 13-May-2020
 * Update for 20.04 (LTS) base image.
 
+26-May-2020
+* Automatic multiarch build on Travis.
+
 ## Manifest List
 
 Create a multi-architecture manifest list.
