@@ -15,13 +15,19 @@ Source for a slim Ubuntu-based Python3 image
 
 Create a multi-architecture manifest list.
 
-### Background
+<details>
+<summary>
+<b>Background</b>
+</summary>
 
 A single tag in a Docker registry (e.g. `docker.io/ubuntu:bionic` or `docker.io/fnndsc/ubuntu-python3:latest`) can refer to multiple images for different architectures. When a local docker engine executes `docker pull` or `FROM` in a Dockerfile, the correct image that matches the host's native architecture is used.
 
 Images that use `FROM fnndsc/ubuntu-python3:latest` in their Dockerfile (most `fnndsc/pl-*` plugins for ChRIS) can also be built for multiple architectures. You can simply build the same Dockerfile on different hosts without modification, or follow the [steps below](#build) to build cross-platform.
 
 Note that [Dockerhub cannot do autobuilds for non-x86_64 images.](https://github.com/docker/hub-feedback/issues/1779#issuecomment-478100972). Autobuilds from Dockerhub (again, most `fnndsc/pl-*`) are only for x86_64. `fnndsc/ubuntu-python3` is built using [Travis](#Travis-Automatic-Builds), which is a bit less convenient.
+
+</details>
+
 
 ### Build
 
