@@ -50,4 +50,4 @@ docker run --rm --privileged aptman/qus -- -r
 
 Travis automatically builds and pushes [`master`](https://github.com/FNNDSC/ubuntu-python3/tree/master) branch to [Dockerhub](https://hub.docker.com/r/fnndsc/ubuntu-python3/tags) as `fnndsc/ubuntu-python3:latest`. This manifest list will contain images for x86_64 and PowerPC.
 
-If the latest commit is tagged (`git tag <tag_name>`), then the automatic build will also have that tag in addition (`fnndsc/ubuntu-python3:latest` and `fnndsc/ubuntu-python3:<tag_name>`).
+If the latest commit is tagged (`git tag <tag_name>`), then the automatic build will also have that tag in addition (`fnndsc/ubuntu-python3:latest` and `fnndsc/ubuntu-python3:<tag_name>`). In that case we should update https://github.com/FNNDSC/cookiecutter-chrisapp Dockerfile to use the new `fnndsc/ubuntu-python3:<tag_name>`.
