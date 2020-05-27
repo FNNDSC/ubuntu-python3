@@ -50,3 +50,4 @@ jobs:
 after_script:
   - docker buildx rm
   - docker logout
+  - docker run --rm --privileged aptman/qus -- -r
