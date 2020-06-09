@@ -1,5 +1,7 @@
 # ubuntu-python3
 
+[![Build Status](https://travis-ci.org/FNNDSC/ubuntu-python3.svg?branch=master)](https://travis-ci.org/FNNDSC/ubuntu-python3)
+
 Source for a slim Ubuntu-based Python3 image
 
 03-Aug-2018
