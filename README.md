@@ -11,6 +11,9 @@ Source for a slim Ubuntu-based Python3 image
 26-May-2020
 * Automatic multiarch build on Travis.
 
+09-Jun-2020
+* Add DEBIAN_FRONTEND=noninteractive env variable.
+
 ## Manifest List
 
 Create a multi-architecture manifest list.
