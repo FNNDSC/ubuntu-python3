@@ -42,6 +42,7 @@ First, make sure you have Docker CLI experimetnal features enabled.
 https://github.com/docker/buildx#docker-ce
 
 ```bash
+docker run --rm --privileged aptman/qus -s -- -p ppc64le
 docker buildx create --name moc_builder --use
 docker buildx build -t fnndsc/ubuntu-python3 --platform linux/amd64,linux/ppc64le .
 # clean up
