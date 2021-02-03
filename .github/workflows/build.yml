@@ -44,7 +44,7 @@ jobs:
       - name: Assert Python version string
         run: |
           python_version=${{ steps.python.outputs.version }}
-          if ! [[ "$python_version" =~ '^([0-9]+)\.([0-9]+)\.([0-9]+).*$' ]]; then
+          if [[ ! "$python_version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+).*$ ]]; then
             echo "Cannot understand python version '$python_version'"
             set -ex
             docker run --rm --entrypoint python local/ubuntu-python3 --version
