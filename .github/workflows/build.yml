@@ -1,0 +1,111 @@
+# Build the Docker image and give it two tags (examples):
+#
+# - fnndsc/ubuntu-python3:latest
+# - fnndsc/ubuntu-python3:ubuntu20.04-python3.8.5
+#
+# Then patches the image to change ENTRYPOINT to CMD.
+# These are tagged:
+#
+# - fnndsc/python:latest
+# - fnndsc/python:3.8.5-ubuntu20.04
+#
+# Perfectionist wants to do a context-less Dockerfile-from-stdin
+# build to shave off KB from our build, but there might not be a
+# clean solution for it.
+# https://github.com/docker/build-push-action/issues/288
+
+name: Build
+
+on:
+  schedule:
+    - cron: '00 00 01 * *'  # monthly
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  version:
+    name: Detect software versions
+    runs-on: ubuntu-latest
+    outputs:
+      python: ${{ steps.python.outputs.version }}
+      ubuntu: ${{ steps.ubuntu.outputs.version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        run: docker build -t local/ubuntu-python3 .
+      - name: Get python version
+        id: python
+        run: |
+          python_version="$(docker run --rm --entrypoint python local/ubuntu-python3 --version)"
+          python_version_number="$(awk '{print $2}' <<< $python_version)"
+          echo $python_version_number
+          echo "::set-output name=version::$python_version_number"
+      - name: Assert Python version string
+        run: |
+          python_version=${{ steps.python.outputs.version }}
+          if ! [[ "$python_version" =~ '^([0-9]+)\.([0-9]+)\.([0-9]+).*$' ]]; then
+            echo "Cannot understand python version '$python_version'"
+            set -ex
+            docker run --rm --entrypoint python local/ubuntu-python3 --version
+            exit 1
+          fi
+      - name: Get Ubuntu version
+        id: ubuntu
+        run: |
+          ubuntu_version=$(docker run --rm --entrypoint /bin/sh local/ubuntu-python3 -c 'eval $(cat /etc/*release) && echo $VERSION_ID')
+          echo "::set-output name=version::$ubuntu_version"
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [ version ]
+    steps:
+      - name: Determine tag names
+        id: determine
+        run: |
+          dock_image="${GITHUB_REPOSITORY,,}"  # to lower case
+          ubuntu_version=${{ needs.version.ubuntu }}
+          python_version=${{ needs.python.ubuntu }}
+
+          versioned="ubuntu${ubuntu_version}-python${python_version}"
+          oldnames="$dock_image:latest,$dock_image:$versioned"
+          echo $oldnames
+          echo "::set-output name=oldnames::$oldnames"
+
+          dock_image=$(sed 's/\/.*$/\/python/' <<< $dock_image)
+          versioned="${python_version}-ubuntu${ubuntu_version}"
+          newnames="$dock_image:latest,$dock_image:$versioned"
+          echo $newnames
+          echo "::set-output name=newnames::$newnames"
+
+      - uses: actions/checkout@v2
+
+      - name: Change Dockerfile ENTRYPOINT
+        run: sed 's/ENTRYPOINT/CMD/' Dockerfile > Dockerfile_noentrypoint
+
+      - uses: docker/setup-qemu-action@v1
+        with:
+          platforms: amd64,arm64,ppc64le
+      - uses: docker/setup-buildx-action@v1
+        id: buildx
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      - name: Build fnndsc/ubuntu-python3
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          context: .
+          file: ./Dockerfile
+          tags: ${{ steps.determine.outputs.oldnames }}
+          platforms: ${{ steps.buildx.outputs.platforms }}
+      - name: Build fnndsc/python
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          context: .
+          file: ./Dockerfile_noentrypoint
+          tags: ${{ steps.determine.outputs.newnames }}
+          platforms: ${{ steps.buildx.outputs.platforms }}
