@@ -2,6 +2,8 @@
 
 [![Build](https://github.com/FNNDSC/ubuntu-python3/workflows/Build/badge.svg)](https://github.com/FNNDSC/ubuntu-python3/actions)
 
+https://hub.docker.com/r/fnndsc/ubuntu-python3/tags
+
 A base docker image for `python3` in `ubuntu:latest`
 
 - `fnndsc/ubuntu-python3` uses `ENTRYPOINT ["python3"]`
