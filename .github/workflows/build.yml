@@ -64,8 +64,8 @@ jobs:
         id: determine
         run: |
           dock_image="${GITHUB_REPOSITORY,,}"  # to lower case
-          ubuntu_version=${{ needs.version.ubuntu }}
-          python_version=${{ needs.python.ubuntu }}
+          ubuntu_version=${{ needs.version.outputs.ubuntu }}
+          python_version=${{ needs.version.outputs.python }}
 
           versioned="ubuntu${ubuntu_version}-python${python_version}"
           oldnames="$dock_image:latest,$dock_image:$versioned"
